@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Distant Early Blogging]]></title>
+  <link href="http://www.robjoh.com/atom.xml" rel="self"/>
+  <link href="http://www.robjoh.com/"/>
+  <updated>2014-05-14T20:38:55-07:00</updated>
+  <id>http://www.robjoh.com/</id>
+  <author>
+    <name><![CDATA[Rob Johnson]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[First Post]]></title>
+    <link href="http://www.robjoh.com/blog/2014/05/14/first-post/"/>
+    <updated>2014-05-14T20:21:54-07:00</updated>
+    <id>http://www.robjoh.com/blog/2014/05/14/first-post</id>
+    <content type="html"><![CDATA[<h1>First post</h1>
+
+<p>Hello</p>
+]]></content>
+  </entry>
+  
+</feed>

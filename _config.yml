@@ -2,10 +2,10 @@
 #      Main Configs       #
 # ----------------------- #
 
-url: http://yoursite.com
-title: My Octopress Blog
-subtitle: A blogging framework for hackers.
-author: Your Name
+url: http://www.robjoh.com
+title: Distant Early Blogging
+subtitle: My ramblings.
+author: Rob Johnson
 simple_search: https://www.google.com/search
 description:
 

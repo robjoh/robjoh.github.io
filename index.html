@@ -94,7 +94,7 @@
 
   <div class="entry-content"><p>On my current project we are working on our Business Continuity Plan for our various dependencies. One of those dependencies, Azure Blob Storage, already provides some redundancy with local or geo-redundant storage. However, you may still suffer some downtime while the failover process is being executed. Azure recently introduced the Read Access Geo-Redundant Storage feature which exposes a secondary endpoint which opens up access to one of the readonly replicas of your storage account. You can enable this on the configure page for your blob storage account and once setup the endpoint can be found on the dashboard.</p>
 
-<p>To use it from the blob storage client you just need to set the desired <a href="http://msdn.microsoft.com/library/azure/microsoft.windowsazure.storage.retrypolicies.locationmode(v=azure.10">LocationMode</a>.aspx).</p>
+<p>To use it from the blob storage client you just need to set the desired <a href="http://msdn.microsoft.com/library/azure/microsoft.windowsazure.storage.retrypolicies.locationmode.aspx">LocationMode</a>.</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>

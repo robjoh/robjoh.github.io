@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Rob Johnson</title>
+  <title>Azure Read Access Geo-redundant Storage Client - Rob Johnson</title>
   <meta name="author" content="Rob Johnson">
 
   
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://www.robjoh.com">
+  <link rel="canonical" href="http://www.robjoh.com/blog/2014/05/22/azure-read-access-geo-redundant-storage-client">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Rob Johnson" type="application/atom+xml">
@@ -61,15 +61,12 @@
 </nav>
   <div id="main">
     <div id="content">
-      <div class="blog-index">
+      <div>
+<article class="hentry" role="article">
   
-  
-  
-    <article>
-      
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/05/22/azure-read-access-geo-redundant-storage-client/">Azure Read Access Geo-redundant Storage Client</a></h1>
+      <h1 class="entry-title">Azure Read Access Geo-redundant Storage Client</h1>
     
     
       <p class="meta">
@@ -92,7 +89,7 @@
   </header>
 
 
-  <div class="entry-content"><p>On my current project we are working on our Business Continuity Plan for our various dependencies. One of those dependencies, Azure Blob Storage, already provides some redundancy with local or geo-redundant storage. However, you may still suffer some downtime while the failover process is being executed. Azure recently introduced the Read Access Geo-Redundant Storage feature which exposes a secondary endpoint which opens up access to one of the readonly replicas of your storage account. You can enable this on the configure page for your blob storage account and once setup the endpoint can be found on the dashboard.</p>
+<div class="entry-content"><p>On my current project we are working on our Business Continuity Plan for our various dependencies. One of those dependencies, Azure Blob Storage, already provides some redundancy with local or geo-redundant storage. However, you may still suffer some downtime while the failover process is being executed. Azure recently introduced the Read Access Geo-Redundant Storage feature which exposes a secondary endpoint which opens up access to one of the readonly replicas of your storage account. You can enable this on the configure page for your blob storage account and once setup the endpoint can be found on the dashboard.</p>
 
 <p>To use it from the blob storage client you just need to set the desired <a href="http://msdn.microsoft.com/library/azure/microsoft.windowsazure.storage.retrypolicies.locationmode.aspx">LocationMode</a>.</p>
 
@@ -107,18 +104,55 @@
 
 <p>We will be using <em>PrimaryThenSecondary</em> for our query scenarios. So in the event of an outage the client automatically retries against the secondary replica and our app remains functional. Similarily, we&rsquo;ll be using this for robustness in asset delivery as our CDN&rsquo;s will be configured to use both primary and a secondary/fallback origin.</p>
 </div>
+
+
+  <footer>
+    <p class="meta">
+      
   
+
+<span class="byline author vcard">Posted by <span class="fn">Rob Johnson</span></span>
+
+      
+
+
+
+
+
+
+
+
   
 
 
-    </article>
+<time datetime="2014-05-22T14:14:32-07:00" pubdate data-updated="true">May 22<span>nd</span>, 2014</time>
+      
+
+<span class="categories">
   
-  <div class="pagination">
+    <a class='category' href='/blog/categories/azure/'>azure</a>
+  
+</span>
+
+
+    </p>
     
-    <a href="/blog/archives">Blog Archives</a>
-    
-  </div>
+      <div class="sharing">
+  
+  
+  
 </div>
+
+    
+    <p class="meta">
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
 <aside class="sidebar">
   
     <section>
@@ -138,6 +172,7 @@
 
   
 </aside>
+
 
     </div>
   </div>

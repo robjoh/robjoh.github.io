@@ -4,7 +4,6 @@ title: "Accessing Azure Service Bus with Node.js"
 date: 2014-08-16 13:00:41 -0700
 comments: true
 categories: azure node.js
-published: false
 ---
 One of the services we are building makes use of Azure Service Bus and we decided that we'd like to monitor the lengths of some of the subscriptions. I've been wanting to learn Node.js and so this sounded like a simple and fun project to start with. For the purpose of this post, I used the [azure portal](https://manage.windowsazure.com) to create a new service bus namespace *azure-service-bus-nodejs* with a single topic *my-topic* that has a single subscription *my-subscription*. You can find the code on GitHub at https://github.com/robjoh/azure-service-bus-nodejs, at the end of each section I'm including a link to the respective commit.
 

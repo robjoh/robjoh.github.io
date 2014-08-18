@@ -4,7 +4,7 @@
   <title><![CDATA[Category: node.js | Rob Johnson]]></title>
   <link href="http://www.robjoh.com/blog/categories/node-dot-js/atom.xml" rel="self"/>
   <link href="http://www.robjoh.com/"/>
-  <updated>2014-08-17T18:09:46-07:00</updated>
+  <updated>2014-08-17T18:17:02-07:00</updated>
   <id>http://www.robjoh.com/</id>
   <author>
     <name><![CDATA[Rob Johnson]]></name>
@@ -133,7 +133,7 @@ Content-Length: 95</p>
 
 <h3>What about subscriptions</h3>
 
-<p>Next we&rsquo;ll add support to get the list of subscriptions for a topic. We&rsquo;ll now accept the topic name as the url path. The code has also be broken up into a few functions with clearer repsonsibilities such as getting the data and writing the response and better organize the code.</p>
+<p>Next we&rsquo;ll add support to get the list of subscriptions for a topic. We&rsquo;ll now accept the topic name as the url path. The code has also been broken up into a few functions with clearer repsonsibilities such as getting the data, writing the response and better organization.</p>
 
 <p>```javascript
 &ldquo;use strict&rdquo;</p>
@@ -307,7 +307,7 @@ return {
 
 <p>module.exports.createClient = createClient;
 <code>``
-The [module system](http://nodejs.org/api/modules.html) allows us to move map functions out but they will remain private to this module. Only things exported via</code>module.exports<code>are available externally. To reference our module we simply</code>require(&lsquo;./service-bus.js&rsquo;)`. Our server.js has been reduced to the following.</p>
+The [module system](http://nodejs.org/api/modules.html) allows us to move the map functions out but they will remain private to this module. Only things exported via</code>module.exports<code>are available externally and so we export a single method to enable client creation. To reference our module we simply</code>require(&lsquo;./service-bus.js&rsquo;)`. Now our server.js has been reduced to the following.</p>
 
 <p>```javascript
 &ldquo;use strict&rdquo;</p>
@@ -356,7 +356,7 @@ function writeResult(error, result) {
 
 <h3>Easier http with Express</h3>
 
-<p>As the application grows, the http request/response manipulation has been getting more and more complex and fraught with other issues such as ignoring http verbs. Let&rsquo;s pull in <a href="http://expressjs.com/">express</a> and clean this up. As earlier, we pull in express with <code>npm install express --save</code> and <code>require('express')</code>. As shown in the following code, you can set up handlers for verb/template combinations. For example, app.get(&lsquo;/:topic&rsquo;) matches an HTTP GET for /my-topic. If you look closely you&rsquo;ll notice that it also placed the topic parameter into httpReq.params.topic saving us from all of that parsing. Other nice things are the chainability of the response and it&rsquo;s automatic json conversion.</p>
+<p>As the application has grown, the http request/response manipulation has been getting more complex and fraught with other issues such as ignoring http verbs. Let&rsquo;s pull in <a href="http://expressjs.com/">express</a> and clean this up. As earlier, we pull in express with <code>npm install express --save</code> and <code>require('express')</code>. As shown in the following code, you can set up handlers for verb/template combinations. For example, app.get(&lsquo;/:topic&rsquo;) matches an HTTP GET for /my-topic. If you look closely you&rsquo;ll notice that the topic parameter has been placed into httpReq.params.topic saving us from all of that parsing. Other nice things are the chainability of the response and it&rsquo;s automatic json conversion (no more JSON.stringify).</p>
 
 <p>```javascript
 &ldquo;use strict&rdquo;</p>

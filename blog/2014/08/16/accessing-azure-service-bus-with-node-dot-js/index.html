@@ -1,30 +1,101 @@
-<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Rob Johnson]]></title>
-  <link href="http://www.robjoh.com/atom.xml" rel="self"/>
-  <link href="http://www.robjoh.com/"/>
-  <updated>2014-08-17T17:56:32-07:00</updated>
-  <id>http://www.robjoh.com/</id>
-  <author>
-    <name><![CDATA[Rob Johnson]]></name>
-    
-  </author>
-  <generator uri="http://octopress.org/">Octopress</generator>
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Accessing Azure Service Bus With Node.js - Rob Johnson</title>
+  <meta name="author" content="Rob Johnson">
 
   
-  <entry>
-    <title type="html"><![CDATA[Accessing Azure Service Bus With Node.js]]></title>
-    <link href="http://www.robjoh.com/blog/2014/08/16/accessing-azure-service-bus-with-node-dot-js/"/>
-    <updated>2014-08-16T13:00:41-07:00</updated>
-    <id>http://www.robjoh.com/blog/2014/08/16/accessing-azure-service-bus-with-node-dot-js</id>
-    <content type="html"><![CDATA[<p>One of the services we are building makes use of Azure Service Bus and we decided that we&rsquo;d like to monitor the lengths of some of the subscriptions. I&rsquo;ve been wanting to learn Node.js and so this sounded like a simple and fun project to start with. For the purpose of this post, I used the <a href="https://manage.windowsazure.com">azure portal</a> to create a new service bus namespace <em>azure-service-bus-nodejs</em> with a single topic <em>my-topic</em> that has a single subscription <em>my-subscription</em>. You can find the code on GitHub at <a href="https://github.com/robjoh/azure-service-bus-nodejs,">https://github.com/robjoh/azure-service-bus-nodejs,</a> at the end of each section I&rsquo;m including a link to the respective commit.</p>
+  <meta name="description" content="One of the services we are building makes use of Azure Service Bus and we decided that we&rsquo;d like to monitor the lengths of some of the &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://www.robjoh.com/blog/2014/08/16/accessing-azure-service-bus-with-node-dot-js">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Rob Johnson" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Rob Johnson</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:www.robjoh.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Accessing Azure Service Bus With Node.js</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-16T13:00:41-07:00" pubdate data-updated="true">Aug 16<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>One of the services we are building makes use of Azure Service Bus and we decided that we&rsquo;d like to monitor the lengths of some of the subscriptions. I&rsquo;ve been wanting to learn Node.js and so this sounded like a simple and fun project to start with. For the purpose of this post, I used the <a href="https://manage.windowsazure.com">azure portal</a> to create a new service bus namespace <em>azure-service-bus-nodejs</em> with a single topic <em>my-topic</em> that has a single subscription <em>my-subscription</em>. You can find the code on GitHub at <a href="https://github.com/robjoh/azure-service-bus-nodejs,">https://github.com/robjoh/azure-service-bus-nodejs,</a> at the end of each section I&rsquo;m including a link to the respective commit.</p>
 
 <h3>Getting Started</h3>
 
 <p>After <a href="http://nodejs.org/download/">installing Node.js</a> I use <code>npm init</code> to begin a new project. This command asks a few questions (name, version&hellip;) and creates a package.json file that we&rsquo;ll be making use of shortly.</p>
 
-<p><img src="http://www.robjoh.com/images/azure-node-npm-init.png" title="npm init" alt="package.json" /></p>
+<p><img src="/images/azure-node-npm-init.png" title="npm init" alt="package.json" /></p>
 
 <p><small><a href="https://github.com/robjoh/azure-service-bus-nodejs/commit/d675e48768f85a25c211614f8a04b616b30a7b26">commit d675e487</a></small></p>
 
@@ -69,7 +140,7 @@
 
 <p>In this program, we import the azure sdk using node&rsquo;s <em>require()</em> function. Next we create a service bus client for the <em>azure-service-bus-nodejs</em> namespace and execute the listTopics function. If successful, the <em>error</em> parameter will be null and the <em>result</em> parameter will contain the list of topics. Running the program with <code>node server.js</code> outputs the details of <em>my-topic</em>.</p>
 
-<p><img src="http://www.robjoh.com/images/azure-node-list-topics.png" title="node server.js" alt="List of topics" /></p>
+<p><img src="/images/azure-node-list-topics.png" title="node server.js" alt="List of topics" /></p>
 
 <p><small><a href="https://github.com/robjoh/azure-service-bus-nodejs/commit/32e56247885073a500fe78ce2a8ee2ae6fc7b314">commit 32e56247</a></small></p>
 
@@ -647,29 +718,113 @@
 <h3>Wrapping up</h3>
 
 <p>This was a lot of fun but barely scratches the surface of Node.js, express and service bus. Next time I will deploy this to an <a href="http://azure.microsoft.com/en-us/services/websites/">Azure website</a> and integrate it with <a href="http://msdn.microsoft.com/en-us/library/dn481095.aspx">Application Insights</a>.</p>
-]]></content>
-  </entry>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
   
-  <entry>
-    <title type="html"><![CDATA[Azure Read Access Geo-redundant Storage Client]]></title>
-    <link href="http://www.robjoh.com/blog/2014/05/22/azure-read-access-geo-redundant-storage-client/"/>
-    <updated>2014-05-22T14:14:32-07:00</updated>
-    <id>http://www.robjoh.com/blog/2014/05/22/azure-read-access-geo-redundant-storage-client</id>
-    <content type="html"><![CDATA[<p>On my current project we are working on our Business Continuity Plan for our various dependencies. One of those dependencies, Azure Blob Storage, already provides some redundancy with local or geo-redundant storage. However, you may still suffer some downtime while the failover process is being executed. Azure recently introduced the Read Access Geo-Redundant Storage feature which exposes a secondary endpoint which opens up access to one of the readonly replicas of your storage account. You can enable this on the configure page for your blob storage account and once setup the endpoint can be found on the dashboard.</p>
 
-<p>To use it from the blob storage client you just need to set the desired <a href="http://msdn.microsoft.com/library/azure/microsoft.windowsazure.storage.retrypolicies.locationmode.aspx">LocationMode</a>.</p>
+<span class="byline author vcard">Posted by <span class="fn">Rob Johnson</span></span>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="kt">var</span> <span class="n">account</span> <span class="p">=</span> <span class="n">CloudStorageAccount</span><span class="p">.</span><span class="n">Parse</span><span class="p">(</span><span class="n">connectionString</span><span class="p">);</span>
-</span><span class='line'><span class="kt">var</span> <span class="n">client</span> <span class="p">=</span> <span class="n">account</span><span class="p">.</span><span class="n">CreateCloudBlobClient</span><span class="p">();</span>
-</span><span class='line'><span class="n">client</span><span class="p">.</span><span class="n">LocationMode</span> <span class="p">=</span> <span class="n">LocationMode</span><span class="p">.</span><span class="n">PrimaryThenSecondary</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure>
+      
 
 
-<p>We will be using <em>PrimaryThenSecondary</em> for our query scenarios. So in the event of an outage the client automatically retries against the secondary replica and our app remains functional. Similarily, we&rsquo;ll be using this for robustness in asset delivery as our CDN&rsquo;s will be configured to use both primary and a secondary/fallback origin.</p>
-]]></content>
-  </entry>
+
+
+
+
+
+
   
-</feed>
+
+
+<time datetime="2014-08-16T13:00:41-07:00" pubdate data-updated="true">Aug 16<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/azure/'>azure</a>, <a class='category' href='/blog/categories/node-dot-js/'>node.js</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/05/22/azure-read-access-geo-redundant-storage-client/" title="Previous Post: Azure read access geo-redundant storage client">&laquo; Azure read access geo-redundant storage client</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+    <h1><img src="/images/robjoh.jpeg" alt="Rob Johnson"/></h1>
+    <p>Develops web sites and services at Microsoft
+    <br/>
+    <a href="https://www.twitter.com/robjoh">twitter.com/robjoh</a>
+    <br/>
+    <a href="https://github.com/robjoh/">github.com/robjoh</a>
+    <br/>
+    <a href="https://www.linkedin.com/in/robjoh">linkedin.com/in/robjoh</a>
+    </p>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/08/16/accessing-azure-service-bus-with-node-dot-js/">Accessing Azure Service Bus With Node.js</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/05/22/azure-read-access-geo-redundant-storage-client/">Azure Read Access Geo-redundant Storage Client</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Rob Johnson -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

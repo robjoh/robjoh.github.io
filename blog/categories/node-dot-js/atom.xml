@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Azure | Rob Johnson]]></title>
-  <link href="http://www.robjoh.com/blog/categories/azure/atom.xml" rel="self"/>
+  <title><![CDATA[Category: node.js | Rob Johnson]]></title>
+  <link href="http://www.robjoh.com/blog/categories/node-dot-js/atom.xml" rel="self"/>
   <link href="http://www.robjoh.com/"/>
   <updated>2014-08-17T17:56:32-07:00</updated>
   <id>http://www.robjoh.com/</id>
@@ -414,25 +414,6 @@ var app = express();</p>
 <h3>Wrapping up</h3>
 
 <p>This was a lot of fun but barely scratches the surface of Node.js, express and service bus. Next time I will deploy this to an <a href="http://azure.microsoft.com/en-us/services/websites/">Azure website</a> and integrate it with <a href="http://msdn.microsoft.com/en-us/library/dn481095.aspx">Application Insights</a>.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Azure Read Access Geo-redundant Storage Client]]></title>
-    <link href="http://www.robjoh.com/blog/2014/05/22/azure-read-access-geo-redundant-storage-client/"/>
-    <updated>2014-05-22T14:14:32-07:00</updated>
-    <id>http://www.robjoh.com/blog/2014/05/22/azure-read-access-geo-redundant-storage-client</id>
-    <content type="html"><![CDATA[<p>On my current project we are working on our Business Continuity Plan for our various dependencies. One of those dependencies, Azure Blob Storage, already provides some redundancy with local or geo-redundant storage. However, you may still suffer some downtime while the failover process is being executed. Azure recently introduced the Read Access Geo-Redundant Storage feature which exposes a secondary endpoint which opens up access to one of the readonly replicas of your storage account. You can enable this on the configure page for your blob storage account and once setup the endpoint can be found on the dashboard.</p>
-
-<p>To use it from the blob storage client you just need to set the desired <a href="http://msdn.microsoft.com/library/azure/microsoft.windowsazure.storage.retrypolicies.locationmode.aspx">LocationMode</a>.</p>
-
-<p><code>c#
-var account = CloudStorageAccount.Parse(connectionString);
-var client = account.CreateCloudBlobClient();
-client.LocationMode = LocationMode.PrimaryThenSecondary;
-</code></p>
-
-<p>We will be using <em>PrimaryThenSecondary</em> for our query scenarios. So in the event of an outage the client automatically retries against the secondary replica and our app remains functional. Similarily, we&rsquo;ll be using this for robustness in asset delivery as our CDN&rsquo;s will be configured to use both primary and a secondary/fallback origin.</p>
 ]]></content>
   </entry>
   

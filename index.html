@@ -9,7 +9,7 @@
   <meta name="author" content="Rob Johnson">
 
   
-  <meta name="description" content="On my current project we are working on our Business Continuity Plan for our various dependencies. One of those dependencies, Azure Blob Storage, &hellip;">
+  <meta name="description" content="One of the services we are building makes use of Azure Service Bus and we decided that we&rsquo;d like to monitor the lengths of some of the &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -63,6 +63,670 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/16/accessing-azure-service-bus-with-node-dot-js/">Accessing Azure Service Bus With Node.js</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-16T13:00:41-07:00" pubdate data-updated="true">Aug 16<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>One of the services we are building makes use of Azure Service Bus and we decided that we&rsquo;d like to monitor the lengths of some of the subscriptions. I&rsquo;ve been wanting to learn Node.js and so this sounded like a simple and fun project to start with. For the purpose of this post, I used the <a href="https://manage.windowsazure.com">azure portal</a> to create a new service bus namespace <em>azure-service-bus-nodejs</em> with a single topic <em>my-topic</em> that has a single subscription <em>my-subscription</em>. You can find the code on GitHub at <a href="https://github.com/robjoh/azure-service-bus-nodejs,">https://github.com/robjoh/azure-service-bus-nodejs,</a> at the end of each section I&rsquo;m including a link to the respective commit.</p>
+
+<h3>Getting Started</h3>
+
+<p>After <a href="http://nodejs.org/download/">installing Node.js</a> I use <code>npm init</code> to begin a new project. This command asks a few questions (name, version&hellip;) and creates a package.json file that we&rsquo;ll be making use of shortly.</p>
+
+<p><img src="/images/azure-node-npm-init.png" title="npm init" alt="package.json" /></p>
+
+<p><small><a href="https://github.com/robjoh/azure-service-bus-nodejs/commit/d675e48768f85a25c211614f8a04b616b30a7b26">commit d675e487</a></small></p>
+
+<h3>Connecting to Azure Service Bus</h3>
+
+<p>Now let&rsquo;s install the <a href="https://github.com/Azure/azure-sdk-for-node">Azure sdk for node</a> with <code>npm install azure --save</code>. The &mdash;save option adds azure to the dependencies section of package.json. With the azure sdk is installed, I next create a server.js file which will contain the following program.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="s2">&quot;use strict&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">namespace</span> <span class="o">=</span> <span class="s1">&#39;azure-service-bus-nodejs&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">accessKey</span> <span class="o">=</span> <span class="s1">&#39;[Access key for this namespace]&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">azure</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;azure&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">client</span> <span class="o">=</span> <span class="nx">azure</span><span class="p">.</span><span class="nx">createServiceBusService</span><span class="p">(</span><span class="nx">namespace</span><span class="p">,</span> <span class="nx">accessKey</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">client</span><span class="p">.</span><span class="nx">listTopics</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">error</span><span class="p">,</span> <span class="nx">result</span><span class="p">,</span> <span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">error</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">return</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">result</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="mi">3</span><span class="p">));</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In this program, we import the azure sdk using node&rsquo;s <em>require()</em> function. Next we create a service bus client for the <em>azure-service-bus-nodejs</em> namespace and execute the listTopics function. If successful, the <em>error</em> parameter will be null and the <em>result</em> parameter will contain the list of topics. Running the program with <code>node server.js</code> outputs the details of <em>my-topic</em>.</p>
+
+<p><img src="/images/azure-node-list-topics.png" title="node server.js" alt="List of topics" /></p>
+
+<p><small><a href="https://github.com/robjoh/azure-service-bus-nodejs/commit/32e56247885073a500fe78ce2a8ee2ae6fc7b314">commit 32e56247</a></small></p>
+
+<h3>Make it a web service</h3>
+
+<p>Now that we have the basic code for retrieving the list of topics, let&rsquo;s expose that functionality over http.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="s2">&quot;use strict&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">namespace</span> <span class="o">=</span> <span class="s1">&#39;azure-service-bus-nodejs&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">accessKey</span> <span class="o">=</span> <span class="s1">&#39;[Access key for this namespace]&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">azure</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;azure&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">http</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;http&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">client</span> <span class="o">=</span> <span class="nx">azure</span><span class="p">.</span><span class="nx">createServiceBusService</span><span class="p">(</span><span class="nx">namespace</span><span class="p">,</span> <span class="nx">accessKey</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">server</span> <span class="o">=</span> <span class="nx">http</span><span class="p">.</span><span class="nx">createServer</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">httpReq</span><span class="p">,</span> <span class="nx">httpResp</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">client</span><span class="p">.</span><span class="nx">listTopics</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">error</span><span class="p">,</span> <span class="nx">result</span><span class="p">,</span> <span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="nx">httpResp</span><span class="p">.</span><span class="nx">writeHead</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;Content-Type&#39;</span><span class="o">:</span> <span class="s1">&#39;application/json&#39;</span><span class="p">});</span>
+</span><span class='line'>            <span class="nx">httpResp</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">error</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="mi">3</span><span class="p">));</span>
+</span><span class='line'>            <span class="nx">httpResp</span><span class="p">.</span><span class="nx">end</span><span class="p">();</span>
+</span><span class='line'>            <span class="k">return</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">var</span> <span class="nx">topics</span> <span class="o">=</span> <span class="nx">result</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">topic</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="p">{</span>
+</span><span class='line'>                <span class="nx">name</span><span class="o">:</span> <span class="nx">topic</span><span class="p">.</span><span class="nx">TopicName</span><span class="p">,</span>
+</span><span class='line'>                <span class="nx">totalSubscriptions</span><span class="o">:</span> <span class="nx">topic</span><span class="p">.</span><span class="nx">SubscriptionCount</span><span class="p">,</span>
+</span><span class='line'>                <span class="nx">totalSize</span><span class="o">:</span> <span class="nx">topic</span><span class="p">.</span><span class="nx">SizeInBytes</span>
+</span><span class='line'>            <span class="p">};</span>
+</span><span class='line'>        <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nx">httpResp</span><span class="p">.</span><span class="nx">writeHead</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;Content-Type&#39;</span><span class="o">:</span> <span class="s1">&#39;application/json&#39;</span><span class="p">});</span>
+</span><span class='line'>        <span class="nx">httpResp</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">topics</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="mi">3</span><span class="p">));</span>
+</span><span class='line'>        <span class="nx">httpResp</span><span class="p">.</span><span class="nx">end</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">server</span><span class="p">.</span><span class="nx">listen</span><span class="p">(</span><span class="mi">8080</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In this code we pull in node&rsquo;s <a href="http://nodejs.org/api/http.html">http module</a> and create a server that listens on port 8080. <em>createServer()</em> takes a function with arguments for the http request and response. When the server receives a request we make the listTopics call. If an error occurs we will return a 500 with the details. On a successful call, we&rsquo;ll use the <em>map</em> function to return an array of topic information. The http request/response would look like this.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='http'><span class='line'><span class="nf">GET</span> <span class="nn">http://localhost:8080/</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</span><span class='line'><span class="na">Host</span><span class="o">:</span> <span class="l">localhost:8080</span>
+</span><span class='line'>
+</span><span class='line'>HTTP/1.1 200 OK
+</span><span class='line'>Content-Type: application/json
+</span><span class='line'>Date: Sun, 17 Aug 2014 19:15:51 GMT
+</span><span class='line'>Content-Length: 95
+</span><span class='line'>
+</span><span class='line'>[
+</span><span class='line'>   {
+</span><span class='line'>      &quot;name&quot;: &quot;my-topic&quot;,
+</span><span class='line'>      &quot;totalSubscriptions&quot;: &quot;1&quot;,
+</span><span class='line'>      &quot;totalSize&quot;: &quot;0&quot;
+</span><span class='line'>   }
+</span><span class='line'>]
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><small><a href="https://github.com/robjoh/azure-service-bus-nodejs/commit/ae2a14404ed51d0beb73a068685d512e6442b3ae">commit ae2a1440</a></small></p>
+
+<h3>What about subscriptions</h3>
+
+<p>Next we&rsquo;ll add support to get the list of subscriptions for a topic. We&rsquo;ll now accept the topic name as the url path. The code has also be broken up into a few functions with clearer repsonsibilities such as getting the data and writing the response and better organize the code.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="s2">&quot;use strict&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">namespace</span> <span class="o">=</span> <span class="s1">&#39;azure-service-bus-nodejs&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">accessKey</span> <span class="o">=</span> <span class="s1">&#39;[Access key for this namespace]&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">azure</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;azure&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">http</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;http&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">client</span> <span class="o">=</span> <span class="nx">azure</span><span class="p">.</span><span class="nx">createServiceBusService</span><span class="p">(</span><span class="nx">namespace</span><span class="p">,</span> <span class="nx">accessKey</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">server</span> <span class="o">=</span> <span class="nx">http</span><span class="p">.</span><span class="nx">createServer</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">httpReq</span><span class="p">,</span> <span class="nx">httpResp</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="nx">httpReq</span><span class="p">.</span><span class="nx">url</span> <span class="o">===</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">getTopics</span><span class="p">(</span><span class="nx">writeResult</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">getSubscriptions</span><span class="p">(</span><span class="nx">httpReq</span><span class="p">.</span><span class="nx">url</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="nx">writeResult</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">function</span> <span class="nx">getTopics</span><span class="p">(</span><span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">client</span><span class="p">.</span><span class="nx">listTopics</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">error</span><span class="p">,</span> <span class="nx">result</span><span class="p">,</span> <span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                <span class="nx">callback</span><span class="p">(</span><span class="nx">error</span><span class="p">)</span>
+</span><span class='line'>                <span class="k">return</span><span class="p">;</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="kd">var</span> <span class="nx">topics</span> <span class="o">=</span> <span class="nx">result</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">topic</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                <span class="k">return</span> <span class="p">{</span>
+</span><span class='line'>                    <span class="nx">name</span><span class="o">:</span> <span class="nx">topic</span><span class="p">.</span><span class="nx">TopicName</span><span class="p">,</span>
+</span><span class='line'>                    <span class="nx">totalSubscriptions</span><span class="o">:</span> <span class="nx">topic</span><span class="p">.</span><span class="nx">SubscriptionCount</span><span class="p">,</span>
+</span><span class='line'>                    <span class="nx">totalSize</span><span class="o">:</span> <span class="nx">topic</span><span class="p">.</span><span class="nx">SizeInBytes</span>
+</span><span class='line'>                <span class="p">};</span>
+</span><span class='line'>            <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="nx">callback</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">topics</span><span class="p">);</span>
+</span><span class='line'>        <span class="p">});</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">function</span> <span class="nx">getSubscriptions</span><span class="p">(</span><span class="nx">topic</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">client</span><span class="p">.</span><span class="nx">listSubscriptions</span><span class="p">(</span><span class="nx">topic</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">error</span><span class="p">,</span> <span class="nx">result</span><span class="p">,</span> <span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                <span class="nx">callback</span><span class="p">(</span><span class="nx">error</span><span class="p">);</span>
+</span><span class='line'>                <span class="k">return</span><span class="p">;</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="kd">var</span> <span class="nx">subscriptions</span> <span class="o">=</span> <span class="nx">result</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">subscription</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                <span class="k">return</span> <span class="p">{</span>
+</span><span class='line'>                    <span class="nx">name</span><span class="o">:</span> <span class="nx">subscription</span><span class="p">.</span><span class="nx">SubscriptionName</span><span class="p">,</span>
+</span><span class='line'>                    <span class="nx">totalMessages</span><span class="o">:</span> <span class="nx">subscription</span><span class="p">.</span><span class="nx">MessageCount</span>
+</span><span class='line'>                <span class="p">};</span>
+</span><span class='line'>            <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="nx">callback</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">subscriptions</span><span class="p">);</span>
+</span><span class='line'>        <span class="p">});</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">function</span> <span class="nx">writeResult</span><span class="p">(</span><span class="nx">error</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="nx">httpResp</span><span class="p">.</span><span class="nx">writeHead</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;Content-Type&#39;</span><span class="o">:</span> <span class="s1">&#39;application/json&#39;</span><span class="p">});</span>
+</span><span class='line'>            <span class="nx">httpResp</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">error</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="mi">3</span><span class="p">));</span>
+</span><span class='line'>            <span class="nx">httpResp</span><span class="p">.</span><span class="nx">end</span><span class="p">();</span>
+</span><span class='line'>            <span class="k">return</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nx">httpResp</span><span class="p">.</span><span class="nx">writeHead</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;Content-Type&#39;</span><span class="o">:</span> <span class="s1">&#39;application/json&#39;</span><span class="p">});</span>
+</span><span class='line'>        <span class="nx">httpResp</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">result</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="mi">3</span><span class="p">));</span>
+</span><span class='line'>        <span class="nx">httpResp</span><span class="p">.</span><span class="nx">end</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">server</span><span class="p">.</span><span class="nx">listen</span><span class="p">(</span><span class="mi">8080</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So we can now request the list of subscriptions for a specific topic.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='http'><span class='line'><span class="nf">GET</span> <span class="nn">http://localhost:8080/my-topic</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</span><span class='line'><span class="na">Host</span><span class="o">:</span> <span class="l">localhost:8080</span>
+</span><span class='line'>
+</span><span class='line'>HTTP/1.1 200 OK
+</span><span class='line'>Content-Type: application/json
+</span><span class='line'>Date: Sun, 17 Aug 2014 21:06:30 GMT
+</span><span class='line'>Content-Length: 73
+</span><span class='line'>
+</span><span class='line'>[
+</span><span class='line'>   {
+</span><span class='line'>      &quot;name&quot;: &quot;my-subscription&quot;,
+</span><span class='line'>      &quot;totalMessages&quot;: &quot;0&quot;
+</span><span class='line'>   }
+</span><span class='line'>]
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><small><a href="https://github.com/robjoh/azure-service-bus-nodejs/commit/6a41227305bc20e6ba836b889b3bb09eb91a14b9">commit 6a412273</a></small></p>
+
+<h3>Move service bus to a module</h3>
+
+<p>Now let&rsquo;s move the service bus specific code to a service-bus.js module. This will help reduce the growing mix of request/response handling and application logic.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="s2">&quot;use strict&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">azure</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;azure&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">function</span> <span class="nx">mapTopic</span><span class="p">(</span><span class="nx">topic</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">name</span><span class="o">:</span> <span class="nx">topic</span><span class="p">.</span><span class="nx">TopicName</span><span class="p">,</span>
+</span><span class='line'>        <span class="nx">totalSubscriptions</span><span class="o">:</span> <span class="nx">topic</span><span class="p">.</span><span class="nx">SubscriptionCount</span><span class="p">,</span>
+</span><span class='line'>        <span class="nx">totalSize</span><span class="o">:</span> <span class="nx">topic</span><span class="p">.</span><span class="nx">SizeInBytes</span>
+</span><span class='line'>    <span class="p">};</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">function</span> <span class="nx">mapSubscription</span><span class="p">(</span><span class="nx">subscription</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">name</span><span class="o">:</span> <span class="nx">subscription</span><span class="p">.</span><span class="nx">SubscriptionName</span><span class="p">,</span>
+</span><span class='line'>        <span class="nx">totalMessages</span><span class="o">:</span> <span class="nx">subscription</span><span class="p">.</span><span class="nx">MessageCount</span>
+</span><span class='line'>    <span class="p">};</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">function</span> <span class="nx">createClient</span><span class="p">(</span><span class="nx">namespace</span><span class="p">,</span> <span class="nx">accessKey</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">client</span> <span class="o">=</span> <span class="nx">azure</span><span class="p">.</span><span class="nx">createServiceBusService</span><span class="p">(</span><span class="nx">namespace</span><span class="p">,</span> <span class="nx">accessKey</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">return</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">getTopics</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="nx">client</span><span class="p">.</span><span class="nx">listTopics</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">error</span><span class="p">,</span> <span class="nx">result</span><span class="p">,</span> <span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                <span class="k">if</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                    <span class="nx">callback</span><span class="p">(</span><span class="nx">error</span><span class="p">)</span>
+</span><span class='line'>                    <span class="k">return</span><span class="p">;</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="nx">callback</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">result</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">mapTopic</span><span class="p">));</span>
+</span><span class='line'>            <span class="p">});</span>
+</span><span class='line'>        <span class="p">},</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nx">getSubscriptions</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">topic</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="nx">client</span><span class="p">.</span><span class="nx">listSubscriptions</span><span class="p">(</span><span class="nx">topic</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">error</span><span class="p">,</span> <span class="nx">result</span><span class="p">,</span> <span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                <span class="k">if</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                    <span class="nx">callback</span><span class="p">(</span><span class="nx">error</span><span class="p">);</span>
+</span><span class='line'>                    <span class="k">return</span><span class="p">;</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="nx">callback</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">result</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">mapSubscription</span><span class="p">));</span>
+</span><span class='line'>            <span class="p">});</span>
+</span><span class='line'>        <span class="p">},</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nx">getSubscription</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">topic</span><span class="p">,</span> <span class="nx">subscription</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="nx">client</span><span class="p">.</span><span class="nx">getSubscription</span><span class="p">(</span><span class="nx">topic</span><span class="p">,</span> <span class="nx">subscription</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">error</span><span class="p">,</span> <span class="nx">result</span><span class="p">,</span> <span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                <span class="k">if</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                    <span class="nx">callback</span><span class="p">(</span><span class="nx">error</span><span class="p">);</span>
+</span><span class='line'>                    <span class="k">return</span><span class="p">;</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="nx">callback</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">mapSubscription</span><span class="p">(</span><span class="nx">result</span><span class="p">));</span>
+</span><span class='line'>            <span class="p">});</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">};</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span><span class="p">.</span><span class="nx">createClient</span> <span class="o">=</span> <span class="nx">createClient</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The <a href="http://nodejs.org/api/modules.html">module system</a> allows us to move map functions out but they will remain private to this module. Only things exported via <code>module.exports</code> are available externally. To reference our module we simply <code>require('./service-bus.js')</code>. Our server.js has been reduced to the following.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="s2">&quot;use strict&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">namespace</span> <span class="o">=</span> <span class="s1">&#39;azure-service-bus-nodejs&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">accessKey</span> <span class="o">=</span> <span class="s1">&#39;[Access key for this namespace]&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">serviceBus</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./service-bus.js&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">http</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;http&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">client</span> <span class="o">=</span> <span class="nx">serviceBus</span><span class="p">.</span><span class="nx">createClient</span><span class="p">(</span><span class="nx">namespace</span><span class="p">,</span> <span class="nx">accessKey</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">server</span> <span class="o">=</span> <span class="nx">http</span><span class="p">.</span><span class="nx">createServer</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">httpReq</span><span class="p">,</span> <span class="nx">httpResp</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="nx">httpReq</span><span class="p">.</span><span class="nx">url</span> <span class="o">===</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">client</span><span class="p">.</span><span class="nx">getTopics</span><span class="p">(</span><span class="nx">writeResult</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>        <span class="kd">var</span> <span class="nx">parts</span> <span class="o">=</span> <span class="nx">httpReq</span><span class="p">.</span><span class="nx">url</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="nx">parts</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="nx">client</span><span class="p">.</span><span class="nx">getSubscriptions</span><span class="p">(</span><span class="nx">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nx">writeResult</span><span class="p">);</span>
+</span><span class='line'>        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>            <span class="nx">client</span><span class="p">.</span><span class="nx">getSubscription</span><span class="p">(</span><span class="nx">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nx">parts</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nx">writeResult</span><span class="p">);</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">function</span> <span class="nx">writeResult</span><span class="p">(</span><span class="nx">error</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="nx">httpResp</span><span class="p">.</span><span class="nx">writeHead</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;Content-Type&#39;</span><span class="o">:</span> <span class="s1">&#39;application/json&#39;</span><span class="p">});</span>
+</span><span class='line'>            <span class="nx">httpResp</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">error</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="mi">3</span><span class="p">));</span>
+</span><span class='line'>            <span class="nx">httpResp</span><span class="p">.</span><span class="nx">end</span><span class="p">();</span>
+</span><span class='line'>            <span class="k">return</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nx">httpResp</span><span class="p">.</span><span class="nx">writeHead</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;Content-Type&#39;</span><span class="o">:</span> <span class="s1">&#39;application/json&#39;</span><span class="p">});</span>
+</span><span class='line'>        <span class="nx">httpResp</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">result</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="mi">3</span><span class="p">));</span>
+</span><span class='line'>        <span class="nx">httpResp</span><span class="p">.</span><span class="nx">end</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">server</span><span class="p">.</span><span class="nx">listen</span><span class="p">(</span><span class="mi">8080</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><small><a href="https://github.com/robjoh/azure-service-bus-nodejs/commit/1ebd6fbf376cac48740692c0836c8e5e10b3eecb">commit 1ebd6fbf</a></small></p>
+
+<h3>Easier http with Express</h3>
+
+<p>As the application grows, the http request/response manipulation has been getting more and more complex and fraught with other issues such as ignoring http verbs. Let&rsquo;s pull in <a href="http://expressjs.com/">express</a> and clean this up. As earlier, we pull in express with <code>npm install express --save</code> and <code>require('express')</code>. As shown in the following code, you can set up handlers for verb/template combinations. For example, app.get(&lsquo;/:topic&rsquo;) matches an HTTP GET for /my-topic. If you look closely you&rsquo;ll notice that it also placed the topic parameter into httpReq.params.topic saving us from all of that parsing. Other nice things are the chainability of the response and it&rsquo;s automatic json conversion.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="s2">&quot;use strict&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">namespace</span> <span class="o">=</span> <span class="s1">&#39;azure-service-bus-nodejs&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">accessKey</span> <span class="o">=</span> <span class="s1">&#39;[Access key for this namespace]&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">serviceBus</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./service-bus.js&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">http</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;http&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">express</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;express&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">client</span> <span class="o">=</span> <span class="nx">serviceBus</span><span class="p">.</span><span class="nx">createClient</span><span class="p">(</span><span class="nx">namespace</span><span class="p">,</span> <span class="nx">accessKey</span><span class="p">);</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">httpReq</span><span class="p">,</span> <span class="nx">httpResp</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">client</span><span class="p">.</span><span class="nx">getTopics</span><span class="p">(</span><span class="nx">writeResult</span><span class="p">(</span><span class="nx">httpResp</span><span class="p">));</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/:topic&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">httpReq</span><span class="p">,</span> <span class="nx">httpResp</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">client</span><span class="p">.</span><span class="nx">getSubscriptions</span><span class="p">(</span><span class="nx">httpReq</span><span class="p">.</span><span class="nx">params</span><span class="p">.</span><span class="nx">topic</span><span class="p">,</span> <span class="nx">writeResult</span><span class="p">(</span><span class="nx">httpResp</span><span class="p">));</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/:topic/:subscription&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">httpReq</span><span class="p">,</span> <span class="nx">httpResp</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">client</span><span class="p">.</span><span class="nx">getSubscription</span><span class="p">(</span><span class="nx">httpReq</span><span class="p">.</span><span class="nx">params</span><span class="p">.</span><span class="nx">topic</span><span class="p">,</span> <span class="nx">httpReq</span><span class="p">.</span><span class="nx">params</span><span class="p">.</span><span class="nx">subscription</span><span class="p">,</span> <span class="nx">writeResult</span><span class="p">(</span><span class="nx">httpResp</span><span class="p">));</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">http</span><span class="p">.</span><span class="nx">createServer</span><span class="p">(</span><span class="nx">app</span><span class="p">).</span><span class="nx">listen</span><span class="p">(</span><span class="mi">8080</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">function</span> <span class="nx">writeResult</span><span class="p">(</span><span class="nx">httpResp</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">error</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="nx">httpResp</span><span class="p">.</span><span class="nx">status</span><span class="p">(</span><span class="mi">500</span><span class="p">).</span><span class="nx">send</span><span class="p">(</span><span class="nx">error</span><span class="p">);</span>
+</span><span class='line'>            <span class="k">return</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nx">httpResp</span><span class="p">.</span><span class="nx">status</span><span class="p">(</span><span class="mi">200</span><span class="p">).</span><span class="nx">send</span><span class="p">(</span><span class="nx">result</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><small><a href="https://github.com/robjoh/azure-service-bus-nodejs/commit/9a01d5d03951f34a0c06aa189ab786cbde7d0c98">commit 9a01d5d0</a></small></p>
+
+<h3>Wrapping up</h3>
+
+<p>This was a lot of fun but barely scratches the surface of Node.js, express and service bus. Next time I will deploy this to an <a href="http://azure.microsoft.com/en-us/services/websites/">Azure website</a> and integrate it with <a href="http://msdn.microsoft.com/en-us/library/dn481095.aspx">Application Insights</a>.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -135,6 +799,10 @@
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/08/16/accessing-azure-service-bus-with-node-dot-js/">Accessing Azure Service Bus With Node.js</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2014/05/22/azure-read-access-geo-redundant-storage-client/">Azure Read Access Geo-redundant Storage Client</a>

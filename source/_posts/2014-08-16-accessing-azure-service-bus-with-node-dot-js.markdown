@@ -103,7 +103,7 @@ Content-Length: 95
 <small>[commit ae2a1440](https://github.com/robjoh/azure-service-bus-nodejs/commit/ae2a14404ed51d0beb73a068685d512e6442b3ae)</small>
 
 ###What about subscriptions
-Next we'll add support to get the list of subscriptions for a topic. We'll now accept the topic name as the url path. The code has also be broken up into a few functions with clearer repsonsibilities such as getting the data and writing the response and better organize the code.
+Next we'll add support to get the list of subscriptions for a topic. We'll now accept the topic name as the url path. The code has also been broken up into a few functions with clearer repsonsibilities such as getting the data, writing the response and better organization.
 
 ```javascript
 "use strict"
@@ -259,7 +259,7 @@ function createClient(namespace, accessKey) {
 
 module.exports.createClient = createClient;
 ```
-The [module system](http://nodejs.org/api/modules.html) allows us to move map functions out but they will remain private to this module. Only things exported via `module.exports` are available externally. To reference our module we simply `require('./service-bus.js')`. Our server.js has been reduced to the following.
+The [module system](http://nodejs.org/api/modules.html) allows us to move the map functions out but they will remain private to this module. Only things exported via `module.exports` are available externally and so we export a single method to enable client creation. To reference our module we simply `require('./service-bus.js')`. Now our server.js has been reduced to the following.
 
 ```javascript
 "use strict"
@@ -302,7 +302,7 @@ server.listen(8080);
 <small>[commit 1ebd6fbf](https://github.com/robjoh/azure-service-bus-nodejs/commit/1ebd6fbf376cac48740692c0836c8e5e10b3eecb)</small>
 
 ###Easier http with Express
-As the application grows, the http request/response manipulation has been getting more and more complex and fraught with other issues such as ignoring http verbs. Let's pull in [express](http://expressjs.com/) and clean this up. As earlier, we pull in express with `npm install express --save` and `require('express')`. As shown in the following code, you can set up handlers for verb/template combinations. For example, app.get('/:topic') matches an HTTP GET for /my-topic. If you look closely you'll notice that it also placed the topic parameter into httpReq.params.topic saving us from all of that parsing. Other nice things are the chainability of the response and it's automatic json conversion.
+As the application has grown, the http request/response manipulation has been getting more complex and fraught with other issues such as ignoring http verbs. Let's pull in [express](http://expressjs.com/) and clean this up. As earlier, we pull in express with `npm install express --save` and `require('express')`. As shown in the following code, you can set up handlers for verb/template combinations. For example, app.get('/:topic') matches an HTTP GET for /my-topic. If you look closely you'll notice that the topic parameter has been placed into httpReq.params.topic saving us from all of that parsing. Other nice things are the chainability of the response and it's automatic json conversion (no more JSON.stringify).
 
 ```javascript
 "use strict"

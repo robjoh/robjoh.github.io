@@ -4,7 +4,7 @@
   <title><![CDATA[Category: node.js | Rob Johnson]]></title>
   <link href="http://www.robjoh.com/blog/categories/node-dot-js/atom.xml" rel="self"/>
   <link href="http://www.robjoh.com/"/>
-  <updated>2014-08-17T18:04:01-07:00</updated>
+  <updated>2014-08-17T18:09:46-07:00</updated>
   <id>http://www.robjoh.com/</id>
   <author>
     <name><![CDATA[Rob Johnson]]></name>
@@ -58,7 +58,7 @@ console.log(JSON.stringify(result, null, 3));
 
 <p>In this program, we import the azure sdk using node&rsquo;s <em>require()</em> function. Next we create a service bus client for the <em>azure-service-bus-nodejs</em> namespace and execute the listTopics function. If successful, the <em>error</em> parameter will be null and the <em>result</em> parameter will contain the list of topics. Running the program with <code>node server.js</code> outputs the details of <em>my-topic</em>.</p>
 
-<p><img src="/images/azure-node-list-topics.PNG" title="node server.js" alt="List of topics" /></p>
+<p><img src="/images/azure-node-list-topics.png" title="node server.js" alt="List of topics" /></p>
 
 <p><small><a href="https://github.com/robjoh/azure-service-bus-nodejs/commit/32e56247885073a500fe78ce2a8ee2ae6fc7b314">commit 32e56247</a></small></p>
 
